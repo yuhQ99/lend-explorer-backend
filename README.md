@@ -60,9 +60,8 @@
     + Sau khi tính toán xong mới thực hiện sort theo tổng số lượng vay hoặc cho vay.
   + => Vì vậy sẽ mất thời gian cho việc lấy liquidityIndex hoặc variableBorrowIndex ở pool và price ở contract oracle, xong tính toán với toàn bộ document ở db rồi mới sort toàn bộ dữ liệu ở bảng.
   + */v1/current-position/snapshot*: Flow xử lý API ở controller em đang làm như sau:
-    + Query API được lấy theo timestamp. Từ timestamp query qua flipside để lấy block gần nhất với timestamp đó.
+    + Query API được lấy theo timestamp. Từ timestamp query qua flipside để lấy block gần nhất với timestamp đó. Hiện tại phần này đang tốn nhiều response time nhất.
     + Query data snapshot của user gần nhất với block đó, group theo các loại token.
     + Call multicall để lấy liquidityIndex hoặc variableBorrowIndex ở pool và price của từng đồng token ở block đó
     + Thực hiện tính toán với các dữ liệu đã lấy để trả response
   + => Sẽ mất thời gian cho việc query data từ flipside để lấy block và lấy data onchain từ contract. Ngoài ra việc query data từ database bảng snapshot cũng sẽ mất thời gian mặc dù đã đánh index.
-- Giải pháp tương lai: Có thể sẽ lưu giá của token cũng như variableBorrowIndex và liquidityIndex ở mỗi block vào database (có thể là cache nữa) mỗi khi user query để có thể trả response nhanh hơn ở các lần sau.

@@ -3,8 +3,8 @@
 ## 1. Yêu cầu bài toán:
 - Bài toán yêu cầu thống kê số lượng vay và cho vay của 8 đồng token (CORE, Tether, stCORE, BTCB, USDC, WBTC, COREBTC và ABTC) trên CORE chain.
 - Bài toán sẽ gồm 2 phần chính:
- + Số liệu tổng user vay, cho vay bao nhiêu, có phần sort từng cột, tìm kiếm theo địa chỉ + thời điểm snapshot.
- + List user vay, cho vay với từng token, top 100 user vay, cho vay nhiều nhất đối với từng token
+  + Số liệu tổng user vay, cho vay bao nhiêu, có phần sort từng cột, tìm kiếm theo địa chỉ + thời điểm snapshot.
+  + List user vay, cho vay với từng token, top 100 user vay, cho vay nhiều nhất đối với từng token
 
 ## 2. Giải pháp để lấy số liệu:
 - Số tiền user vay và cho vay thực tế được đánh giá qua các token đại diện vay và cho vay (cColendToken và Colend debt token).
@@ -37,14 +37,14 @@
   + /v1/current-position/details: List chi tiết số user vay, cho vay của từng đồng token. Có hỗ trợ sort + limit để lấy được top 100 user vay, cho vay với từng token
 
 ## 4. Cách chạy:
-- cp .env.example .env
+- ```cp .env.example .env```
 - Thêm giá trị các trường trong .env
 - Build docker:
-  + Build worker scan: docker build -f Dockerfile.scan-lending-position -t lend-explorer-scanning:{tag} .
-  + Build server: docker build -t lend-explorer-backend:{tag} .
+  + Build worker scan: ```docker build -f Dockerfile.scan-lending-position -t lend-explorer-scanning:{tag} .```
+  + Build server: ```docker build -t lend-explorer-backend:{tag} .```
 - Run docker images:
-  + Run worker: docker run --env-file .env --name lend-explorer-scanning lend-explorer-scanning:{tag}
-  + Run server: docker run --env-file .env --name lend-explorer-backend -p {externalPort}:{internalPort} lend-explorer-backend:{tag}
+  + Run worker: ```docker run --env-file .env --name lend-explorer-scanning lend-explorer-scanning:{tag}```
+  + Run server: ```docker run --env-file .env --name lend-explorer-backend -p {externalPort}:{internalPort} lend-explorer-backend:{tag}```
 
 ## 5. Đánh giá:
 1. Ðưa ra độ delay tối thiểu của API list holder, balance, tại sao?
@@ -58,7 +58,7 @@
     + Query bảng current-lending-position để lấy data của từng user.
     + lấy tổng của (scaled balance của các đồng cColendToken, variableDeptToken) * (liquidityIndex hoặc variableBorrowIndex ở block mới nhất trên flipside tùy theo đó là vay hay cho vay) * price của từng đồng token ở block đó. Sau khi tính toán xong với từng document.
     + Sau khi tính toán xong mới thực hiện sort theo tổng số lượng vay hoặc cho vay.
-  + => Vì vậy sẽ mất thời gian cho việc lấy liquidityIndex hoặc variableBorrowIndex ở pool và price ở contract oracle, xong tính toán với các document ở db và sort toàn bộ dữ liệu của db.
+  + => Vì vậy sẽ mất thời gian cho việc lấy liquidityIndex hoặc variableBorrowIndex ở pool và price ở contract oracle, xong tính toán với toàn bộ document ở db rồi mới sort toàn bộ dữ liệu ở bảng.
   + */v1/current-position/snapshot*: Flow xử lý API ở controller em đang làm như sau:
     + Query API được lấy theo timestamp. Từ timestamp query qua flipside để lấy block gần nhất với timestamp đó.
     + Query data snapshot của user gần nhất với block đó, group theo các loại token.

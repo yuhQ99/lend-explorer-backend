@@ -18,11 +18,9 @@ const envVarsSchema = Joi.object()
     JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: Joi.number()
       .default(10)
       .description('minutes after which verify email token expires'),
-    SMTP_HOST: Joi.string().description('server that will send the emails'),
-    SMTP_PORT: Joi.number().description('port to connect to the email server'),
-    SMTP_USERNAME: Joi.string().description('username for email server'),
-    SMTP_PASSWORD: Joi.string().description('password for email server'),
-    EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
+    RPC_URI: Joi.string().description('RPC Server Address'),
+    FLIPSIDE_HOST: Joi.string().description('Flipside host URL').required(),
+    FLIPSIDE_API_KEY_LIST: Joi.string().description('API keys list for Flipside crypto').required(),
   })
   .unknown();
 
@@ -37,11 +35,6 @@ module.exports = {
   port: envVars.PORT,
   mongoose: {
     url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
-    options: {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    },
   },
   jwt: {
     secret: envVars.JWT_SECRET,
@@ -50,15 +43,11 @@ module.exports = {
     resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
     verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
   },
-  email: {
-    smtp: {
-      host: envVars.SMTP_HOST,
-      port: envVars.SMTP_PORT,
-      auth: {
-        user: envVars.SMTP_USERNAME,
-        pass: envVars.SMTP_PASSWORD,
-      },
-    },
-    from: envVars.EMAIL_FROM,
+  rpc: {
+    uri: envVars.RPC_URI,
+  },
+  flipside: {
+    apiKeysList: envVars.FLIPSIDE_API_KEY_LIST.split(','),
+    host: envVars.FLIPSIDE_HOST,
   },
 };

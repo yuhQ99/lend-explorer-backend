@@ -13,13 +13,15 @@ const paginate = (schema) => {
    * Query for documents with pagination
    * @param {Object} [filter] - Mongo filter
    * @param {Object} [options] - Query options
+   * @param {boolean} [lean] - is lean query or not
    * @param {string} [options.sortBy] - Sorting criteria using the format: sortField:(desc|asc). Multiple sorting criteria should be separated by commas (,)
    * @param {string} [options.populate] - Populate data fields. Hierarchy of fields should be separated by (.). Multiple populating criteria should be separated by commas (,)
+   * @param {string} [options.select] - Select data fields
    * @param {number} [options.limit] - Maximum number of results per page (default = 10)
    * @param {number} [options.page] - Current page (default = 1)
    * @returns {Promise<QueryResult>}
    */
-  schema.statics.paginate = async function (filter, options) {
+  schema.statics.paginate = async function (filter, options, lean = true) {
     let sort = '';
     if (options.sortBy) {
       const sortingCriteria = [];
@@ -48,6 +50,12 @@ const paginate = (schema) => {
             .reduce((a, b) => ({ path: b, populate: a }))
         );
       });
+    }
+    if (options.select) {
+      docsPromise = docsPromise.select(options.select);
+    }
+    if (lean) {
+      docsPromise = docsPromise.lean();
     }
 
     docsPromise = docsPromise.exec();

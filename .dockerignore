@@ -1,3 +1,36 @@
+# dependencies
 node_modules
+
+# git
 .git
 .gitignore
+.gitattributes
+
+# github
+.github
+k8s
+
+# secret
+.env
+.env.example
+
+# ide
+.idea
+.vscode
+
+# docker
+Dockerfile
+.dockerignore
+
+# misc
+.husky
+.editorconfig
+.eslintignore
+.eslintrc.json
+.lintstagedrc.json
+.prettierignore
+.prettierrc.json
+commitlint.config.js
+jest.config.js
+README.md
+.DS_Store

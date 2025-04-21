@@ -21,16 +21,10 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
 
-# Set production environment
-ENV NODE_ENV=production \
-    PORT=3000
-
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-EXPOSE 3000
-
 # Start the application
-CMD ["node", "src/index.js"]
+CMD ["node", "src/workers/scan-lending-position.js"]
 

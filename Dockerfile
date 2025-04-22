@@ -3,23 +3,25 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package files and esbuild config
+COPY package*.json esbuild.config.js ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies including dev dependencies for esbuild
+RUN npm ci
 
 # Copy source code
 COPY src ./src
+
+# Build using esbuild
+RUN npm install esbuild && node esbuild.config.js
 
 # Stage 2: Final minimal image
 FROM node:22-alpine
 
 WORKDIR /app
 
-# Copy only necessary files from builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/src ./src
+# Copy only the bundled application
+COPY --from=builder /app/dist/app.js ./app.js
 
 # Set production environment
 ENV NODE_ENV=production \
@@ -31,6 +33,6 @@ USER appuser
 
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "src/index.js"]
+# Start the bundled application
+CMD ["node", "app.js"]
 

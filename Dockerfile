@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json esbuild.config.js ./
 
 # Install dependencies including dev dependencies for esbuild
-RUN npm ci
+RUN npm ci --omit=dev
 
 # Copy source code
 COPY src ./src

@@ -25,7 +25,7 @@
 ## 3. Giới thiệu:
 - Backend thống kê số user và số tiền user vay và cho vay. Số liệu được lấy trên CORE chain và tổng hợp từ block 0 tới block hiện tại. Các token được thống kê bao gồm: CORE, Tether, stCORE, BTCB, USDC, WBTC, COREBTC và ABTC
 - Hệ thống backend sẽ có 2 phần chính:
-  + Server: Phục vụ call API để lấy dữ liệu, được viết bằng nodeJS
+  + Server: Phục vụ call API để lấy dữ liệu, được viết bằng framework nodeJS
   + Worker: Phục vụ scan block để lưu trữ số liệu vay, cho vay vào database, được viết bằng nodeJS. Data sẽ được lấy từ Flipside, một nền tảng phân tích dữ liệu on-chain.
   + Database: Phục vụ lưu trữ data crawl. Có 2 bảng chính:
     + Snapshot: Lưu trữ số liệu vay, cho vay của từng user với từng đồng token tại 1 thời điểm snapshot
@@ -46,7 +46,7 @@
   + Run worker: ```docker run --env-file .env --name lend-explorer-scanning lend-explorer-scanning:{tag}```
   + Run server: ```docker run --env-file .env --name lend-explorer-backend -p {externalPort}:{internalPort} lend-explorer-backend:{tag}```
 
-## 5. Đánh giá:
+## 5. Câu hỏi:
 1. Ðưa ra độ delay tối thiểu của API list holder, balance, tại sao?
 - Trả lời: Hiện tại độ delay của API list holder, balance so với thời gian thực là tầm 15-20 phút.
 - Lí do: Hiện tại toàn bộ data được crawl từ Flipside. Do Flipside có thời gian delay là 15-20 phút so với thời gian thực, nên hệ thống cũng phải delay theo Flipside.
@@ -65,3 +65,46 @@
     + Call multicall để lấy liquidityIndex hoặc variableBorrowIndex ở pool và price của từng đồng token ở block đó
     + Thực hiện tính toán với các dữ liệu đã lấy để trả response
   + => Sẽ mất thời gian cho việc query data từ flipside để lấy block và lấy data onchain từ contract. Ngoài ra việc query data từ database bảng snapshot cũng sẽ mất thời gian mặc dù đã đánh index.
+
+## 6. Đánh giá:
+### 6.1. API:
+- Được đánh giá theo response time API
+- Setup test:
+  + Server chạy trên localhost
+  + MongoDB cloud đang hoạt động tại region Singapore.
+  + Flipside gói free
+- Thực hiện test:
+  + Với mỗi API, thực hiện gọi APP 200 lần và lấy thời gian trung bình để đánh giá
+- Kết quả:
+  + Chạy với request giống nhau (chung endpoint và param, query, body)
+
+| API                                        | Number of calls | Mean (ms) | Median (ms) | Min (ms) | Max (ms) |
+|--------------------------------------------|-----------------|-----------|-------------|----------|----------|
+| /v1/current-position                       | 200             | 437.85    | 363.79      | 309.18   | 1266.78  |
+| /v1/current-position?sortBy=totalLend:desc | 200             | 759.49    | 637.75      | 545.14   | 1761.80  |
+| /v1/current-position/snapshot              | 200             | 1625.81   | 1347.92     | 1181.79  | 11165.63 |
+| /v1/current-position/details               | 200             | 393.48    | 277.54      | 235.97   | 1415.86  |
+
+  + Chạy với request khác nhau (chung domain; param, querym body khác nhau)
+
+| API                                        | Number of calls | Mean (ms) | Median (ms) | Min (ms) | Max (ms) |
+|--------------------------------------------|-----------------|-----------|-------------|----------|----------|
+| /v1/current-position                       | 200             | 380.63    | 343.76      | 310.97   | 1154.32  |
+| /v1/current-position?sortBy=totalLend:desc | 200             | 676.08    | 608.12      | 540.41   | 1672.78  |
+| /v1/current-position/snapshot              | 200             | 3613.69   | 3662.02     | 2238.60  | 8361.10  |
+| /v1/current-position/details               | 200             | 304.82    | 258.92      | 235.43   | 1058.45  |
+
+
+### 6.2. Worker:
+- Setup:
+  + MongoDB cloud đang hoạt động tại region Singapore.
+  + Flipside gói free
+- Thực hiện test:
+  + Chạy worker scan lần lượt tổng cộng 100 lượt. Mỗi lượt sẽ lấy 1000 logs từ blockchain và xử lý toàn bộ logs đó và lưu vào database. Việc đánh giá sẽ đánh giá theo thời gian trung bình để xử lý 1 lượt 1000 logs.
+- Kết quả: 
+  + Kết quả chạy 100 lượt sẽ được lưu vào file `/docs/scan-running-test-result.json`
+  + Kết quả tổng:
+
+| Số lượt | Tổng số log | Block bắt đầu | Block cuối cùng | Số blocks | Tổng thời gian (seconds) | Thời gian trung bình mỗi lượt (seconds) |
+|---------|-------------|---------------|-----------------|-----------|--------------------------|-----------------------------------------|
+| 108     | 107694      | 15680824      | 16955642        | 1274819   | 2924.019 = 48 phút       | 27.07                                   |

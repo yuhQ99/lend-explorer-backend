@@ -85,7 +85,7 @@
 | /v1/current-position/snapshot              | 200             | 1625.81   | 1347.92     | 1181.79  | 11165.63 |
 | /v1/current-position/details               | 200             | 393.48    | 277.54      | 235.97   | 1415.86  |
 
-  + Chạy với request khác nhau (chung domain; param, querym body khác nhau)
+  + Chạy với request khác nhau (chung domain; param, query, body khác nhau)
 
 | API                                        | Number of calls | Mean (ms) | Median (ms) | Min (ms) | Max (ms) |
 |--------------------------------------------|-----------------|-----------|-------------|----------|----------|
@@ -101,7 +101,7 @@
   + Flipside gói free
 - Thực hiện test:
   + Chạy worker scan lần lượt tổng cộng 100 lượt. Mỗi lượt sẽ lấy 1000 logs từ blockchain và xử lý toàn bộ logs đó và lưu vào database. Việc đánh giá sẽ đánh giá theo thời gian trung bình để xử lý 1 lượt 1000 logs.
-- Kết quả: 
+- Kết quả:
   + Kết quả chạy 100 lượt sẽ được lưu vào file `/docs/scan-running-test-result.json`
   + Kết quả tổng:
 

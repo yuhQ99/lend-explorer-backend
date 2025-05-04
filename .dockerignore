@@ -34,3 +34,6 @@ commitlint.config.js
 jest.config.js
 README.md
 .DS_Store
+
+# build
+dist
